@@ -10,49 +10,40 @@ namespace Restaurant_Web_API.Services
     public class DatabaseSeeder
     {
         private RestaurantContext _context;
-        private DbSet<Restaurant> _restaurant;
 
-
+        public DatabaseSeeder(RestaurantContext context)
+        {
+            _context = context;
+        }
 
         public void Initialize(IServiceProvider serviceProvider)
         {
-            using (var context = new RestaurantContext(serviceProvider.GetRequiredService<DbContextOptions<RestaurantContext>>()))
+            if (_context.RestaurantSet.Any())
             {
-                if(context.RestaurantSet.Any())
+                return;
+            }
+
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                TrimOptions = TrimOptions.Trim
+            };
+
+            using (var reader = new StreamReader("C:\\Users\\Owner\\OneDrive\\Desktop\\Data_Set_for_Web_API_project\\Restaurant_Scores_CondensedDB.csv"))
+            using (var csv = new CsvReader(reader, config))
+            {
+                csv.Context.RegisterClassMap<RestaurantMap>();
+                csv.Context.TypeConverterOptionsCache.GetOptions<string>().NullValues.Add("");
+
+                var records = csv.GetRecords<Restaurant>().ToList();
+
+                foreach (var record in records)
                 {
-                    return;
+                    _context.Add(record);
                 }
 
-                using (var reader = new StreamReader("C:\\Users\\Owner\\OneDrive\\Desktop\\Data_Set_for_Web_API_project\\Restaurant_Scores_CondensedDB.xlsx")) 
-                using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
-                {
-                    //var record = csv.GetRecord<Restaurant>();
-                    // context.Add<Restaurant>(record);
-                    //context.SaveChanges();
-
-                    csv.Context.RegisterClassMap<RestaurantMap>();
-                    var records = csv.GetRecords<Restaurant>();
-                    context.Add<IEnumerable<Restaurant>>(records);
-                    context.SaveChanges();
-
-                }
+                _context.SaveChanges();
             }
         }
-
-     /*   public void seedDatabaseIfEmpty()
-        {
-            if(!_context.RestaurantSet.Any())
-            {
-                using (var reader = new StreamReader("\"C:\\Users\\Owner\\OneDrive\\Desktop\\Data Set for Web API project\\Restaurant_Scores_CondensedDB.xlsx\""))
-                using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
-                {
-                    var record = csv.GetRecord<Restaurant>();
-                    _context.Add<Restaurant>(record);
-                    _context.SaveChanges();
-                }
-            }
-        } */
-
     }
 
     public sealed class RestaurantMap : ClassMap<Restaurant>
@@ -61,6 +52,7 @@ namespace Restaurant_Web_API.Services
         {
             AutoMap(CultureInfo.InvariantCulture);
             Map(m => m.RestaurantId).Ignore();
+           // Map(m => m.business_id).Name("business_id");
             Map(m => m.business_name).Name("business_name");
             Map(m => m.business_address).Name("business_address");
             Map(m => m.business_city).Name("business_city");

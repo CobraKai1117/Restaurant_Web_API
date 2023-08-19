@@ -1,15 +1,20 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using CsvHelper.Configuration;
 
 namespace Restaurant_Web_API.Models
 {
     public class Restaurant
     {
-       // [Key]
-        //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        //public int RestaurantId { get; set; }
+         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int RestaurantId { get; set; }
 
-        public Guid RestaurantId { get; set; }
+        // public Guid RestaurantId { get; set; }
+
+     
+        //public int business_id { get; set; }
+
         public string business_name { get; set; }
 
         public string business_address { get; set; }

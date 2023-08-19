@@ -30,7 +30,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    DatabaseSeeder DBSeeder = new DatabaseSeeder();
+    DatabaseSeeder DBSeeder = services.GetRequiredService<DatabaseSeeder>();
     DBSeeder.Initialize(services);
 
 }
