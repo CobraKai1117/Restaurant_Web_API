@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Restaurant_Web_API.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("WeatherForecast")]
     public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
@@ -29,5 +29,7 @@ namespace Restaurant_Web_API.Controllers
             })
             .ToArray();
         }
+
+
     }
 }
