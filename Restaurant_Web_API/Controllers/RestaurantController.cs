@@ -14,29 +14,41 @@ namespace Restaurant_Web_API.Controllers
         [HttpGet]
         public async Task<List<Restaurant>> GetRestaurantAsync(int RestaurantId, RestaurantContext context)
         {
-            // IEnumerable<Restaurant> restaurants = await context.RestaurantSet.ToList();
 
-           // var lastId = 55;
+            var restaurantData = await context.RestaurantSet.OrderByDescending(b => b.inspection_date).Take(20).ToListAsync();
 
-            var restaurantData = await context.RestaurantSet.OrderByDescending(b => b.inspection_date).Take(100).ToListAsync();
             return restaurantData;
             
-           // return new string[] { "value1", "value2" };
         }
 
-        // GET api/<RestaurantController>/Charlies Deli Cafe
+        // GET api/<RestaurantController>/Charlies Deli Cafe // Returns restaurants based on name, sorted descended by date
         [HttpGet("{businessName}")]
-        public string Get(string businessName)
+        public async Task<IEnumerable<Restaurant>> GetSpecificRestaurantAsync(string businessName, RestaurantContext context)
         {
-            return "value";
+            // var restaurantData = await context.RestaurantSet.OrderByDescending(b => b.inspection_date).Where(b=>b.business_name == businessName).Take(20).ToListAsync();
+
+            // var restaurantData = await context.RestaurantSet.OrderByDescending(b => b.inspection_date).Where(b => b.business_name == businessName).ToListAsync();
+
+            
+
+            IQueryable<Restaurant> query = context.RestaurantSet.Where(b => b.business_name == businessName).OrderByDescending(b => b.inspection_date).Take(20);
+
+            List<Restaurant> restaurantData = await query.ToListAsync();
+
+            // IEnumerable<Restaurant> test = restaurantData;
+
+            //IQueryable<Restaurant> results = test.AsQueryable();
+
+
+            return restaurantData; 
         }
 
         // GET api/<RestaurantController>/12/11/2020
-        [HttpGet("{inspectionDate}")]
-        public string Get(DateOnly inspectionDate)
-        {
-            return "value";
-        }
+        //[HttpGet("{inspectionDate}")]
+        //public string Get(DateOnly inspectionDate)
+       // {
+        //    return "value";
+       // }
 
 
         // POST api/<RestaurantController>
