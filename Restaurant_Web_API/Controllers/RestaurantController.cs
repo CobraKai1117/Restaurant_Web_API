@@ -2,6 +2,9 @@
 using Restaurant_Web_API.Models;
 using Restaurant_Web_API.Database_Class;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.WebUtilities;
+using Restaurant_Web_API.Database.Data_Filtering;
+
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Restaurant_Web_API.Controllers
@@ -12,10 +15,12 @@ namespace Restaurant_Web_API.Controllers
     {
         // GET: api/<RestaurantController> // Returns all Restaurants from Database
         [HttpGet]
-        public async Task<List<Restaurant>> GetRestaurantAsync(int RestaurantId, RestaurantContext context)
+        public async Task<IEnumerable<Restaurant>> GetRestaurantAsync(int RestaurantId, RestaurantContext context)
         {
 
-            var restaurantData = await context.RestaurantSet.OrderByDescending(b => b.inspection_date).Take(20).ToListAsync();
+            IQueryable<Restaurant> query = context.RestaurantSet.OrderByDescending(b => b.inspection_date).Take(20);
+
+            List<Restaurant> restaurantData = await query.ToListAsync();
 
             return restaurantData;
             
@@ -23,24 +28,31 @@ namespace Restaurant_Web_API.Controllers
 
         // GET api/<RestaurantController>/Charlies Deli Cafe // Returns restaurants based on name, sorted descended by date
         [HttpGet("{businessName}")]
-        public async Task<IEnumerable<Restaurant>> GetSpecificRestaurantAsync(string businessName, RestaurantContext context)
+        public async Task<RestaurantSearchResultModel> GetSpecificRestaurantAsync(string businessName, RestaurantContext context)
         {
             // var restaurantData = await context.RestaurantSet.OrderByDescending(b => b.inspection_date).Where(b=>b.business_name == businessName).Take(20).ToListAsync();
 
             // var restaurantData = await context.RestaurantSet.OrderByDescending(b => b.inspection_date).Where(b => b.business_name == businessName).ToListAsync();
 
-            
+            RestaurantSearchResultModel searchResults = new RestaurantSearchResultModel();
 
             IQueryable<Restaurant> query = context.RestaurantSet.Where(b => b.business_name == businessName).OrderByDescending(b => b.inspection_date).Take(20);
 
-            List<Restaurant> restaurantData = await query.ToListAsync();
+            int resultCount = query.Count();
+           
+            if(resultCount == 0)
+            {
+                searchResults.Message = "No records match the business name specified";
+            }
 
-            // IEnumerable<Restaurant> test = restaurantData;
+            else
+            {
+                searchResults.Message = String.Format ("A total of {0} records have been found.",resultCount);
+            }
 
-            //IQueryable<Restaurant> results = test.AsQueryable();
+            searchResults.Restaurants = await query.ToListAsync();
 
-
-            return restaurantData; 
+            return searchResults;
         }
 
         // GET api/<RestaurantController>/12/11/2020
